@@ -1,0 +1,13 @@
+model:
+  name: "vidore/colpali-v1.2"
+  cache_dir: "/data/hf_models/"
+
+device: "cuda:0"
+
+dataset:
+  input_path: "/data/hf_datasets/colpali_train_set/"
+  output_dir: "/data/hf_datasets/rerank_train_set_colpali_1_2/"
+
+batch_size:
+  image: 4
+  query: 32
