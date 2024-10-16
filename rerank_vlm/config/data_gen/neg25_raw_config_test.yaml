@@ -1,0 +1,18 @@
+model:
+  name: "/data/hf_models/colpali-v1.2-merged"
+  cache_dir: "/data/hf_models/"
+
+device: "cuda:6"
+
+dataset:
+  input_path: "/data/hf_datasets/colpali_train_set/"
+  output_dir: "/data/hf_datasets/rerank_train_set_colpali_1_2merge_test500_qdrantdb/"
+  split: "test"
+
+db:
+  db_path: "/data/hf_datasets/qdrantdb"
+  collection_name: "coplali_full_test500"
+
+batch_size:
+  image: 4
+  query: 32
