@@ -28,7 +28,7 @@ k=25 colpali
 
 int8 perform great √
 
-![image-20241016162023027](C:\Users\coconerd\AppData\Roaming\Typora\typora-user-images\image-20241016162023027.png)
+![image-20241016162023027](assets\image-20241016162023027.png)
 
 
 
@@ -43,7 +43,7 @@ int8 perform great √
 
 process   01m09s+03m34s    <15G
 
-![image-20241016162317970](C:\Users\coconerd\AppData\Roaming\Typora\typora-user-images\image-20241016162317970.png)
+![image-20241016162317970](assets\image-20241016162317970.png)
 
 
 
