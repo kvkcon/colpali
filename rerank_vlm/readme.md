@@ -39,6 +39,11 @@ int8 perform great √
 | test        | 500        | 01m09s | 03m34s | <15G |
 | train(240x) | 118k       | 4h36m  | 3360h  |      |
 
+| -           | final mem | VecDB mem |
+| ----------- | --------- | --------- |
+| test500     | 218MB     | 569MB     |
+| train118695 |           | <144G     |
+
 
 
 process   01m09s+03m34s    <15G
