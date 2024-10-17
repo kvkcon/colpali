@@ -3,6 +3,7 @@ import random
 import os
 import json
 from typing import List, cast
+import argparse
 
 import torch
 from datasets import Dataset, load_dataset, Features, Value, Sequence, Image, load_from_disk
@@ -25,8 +26,15 @@ os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
 
 
 def main():
+    # Initialize ArgumentParser
+    parser = argparse.ArgumentParser(description="Process some integers.")
+    parser.add_argument('--data-source', type=int, choices=[0, 1], help="source pdf&tatdqa that accepts 0 or 1", required=True)
+    args = parser.parse_args()
+
+    data_source = args.data_source
+    print(f"data source value: {data_source}")
     # Load configuration
-    with open('config/data_gen/neg25_raw_config_test.yaml', 'r') as f:
+    with open('config/data_gen/neg25_raw_config_train.yaml', 'r') as f:
         config = yaml.safe_load(f)
 
 
@@ -41,7 +49,8 @@ def main():
     # Creating a Qdrant client
     # global qdrant_client
     qdrant_client = QdrantClient(
-        path=config['db']['db_path'],
+        ":memory:"
+        # path=config['db']['db_path'],
     )  # Use ":memory:" for in-memory database or "path/to/db" for persistent storage
 
     # Create a collection in Qdrant with a multivector configuration
@@ -58,11 +67,16 @@ def main():
             multivector_config=models.MultiVectorConfig(
                 comparator=models.MultiVectorComparator.MAX_SIM
             ),
+            # quantization_config=models.BinaryQuantization(
+            #     binary=models.BinaryQuantizationConfig(
+            #         always_ram=True,
+            #     ),
+            # ),
             quantization_config=models.ScalarQuantization(
                 scalar=models.ScalarQuantizationConfig(
                     type=models.ScalarType.INT8, # Scalar quantization allows you to reduce the number of bits used to 8
                     quantile=0.99,
-                    always_ram=False,
+                    always_ram=True,
                 ),
             ),
         ),
@@ -93,6 +107,12 @@ def main():
 
     # Load the entire dataset
     dataset = cast(Dataset, load_dataset(config['dataset']['input_path'], split=config['dataset']['split']))
+    if data_source == 0:
+        # handle dataset from pdf&tatdqa source
+        dataset = dataset.filter(lambda x: x['source'] in config['dataset']['source'])
+    elif data_source == 1:
+        # handle dataset not from pdf&tatdqa source
+        dataset = dataset.filter(lambda x: x['source'] not in config['dataset']['source'])
     print("Dataset loaded: ", dataset)
 
     # Process all images
@@ -152,6 +172,19 @@ def main():
             continue
 
     print("Indexing complete!")
+    qdrant_client.update_collection(
+        collection_name=collection_name,
+        hnsw_config=models.HnswConfigDiff(
+            m=64,  # Increase the number of edges per node from the default 16 to 32
+            ef_construct=100,  # Increase the number of neighbours from the default 100 to 200
+        )
+    )
+    while True:
+        collection_info = qdrant_client.get_collection(collection_name=collection_name)
+        if collection_info.status == models.CollectionStatus.GREEN:
+            # Collection status is green, which means the indexing is finished
+            break
+    print("HNSW status is green, which means the indexing is finished")
 
 
     def search_images_by_text(query_text, top_k=5):
@@ -166,7 +199,10 @@ def main():
         multivector_query = query_embedding[0].cpu().float().numpy().tolist()
         # Search in Qdrant
         search_result = qdrant_client.query_points(
-            collection_name=collection_name, query=multivector_query, limit=top_k
+            collection_name=collection_name, query=multivector_query, limit=top_k,
+            # search_params=models.SearchParams(
+            #     exact=True,  # Turns on the exact search mode
+            # ),
         )
         return search_result
 
@@ -210,7 +246,19 @@ def main():
             # query_embeddings.extend(list(torch.unbind(embeddings_query.to("cpu"))))
             # Calculate scores and select top 26 negative samples for each query batch
             search_result = qdrant_client.query_points(
-                collection_name=collection_name, query=multivector_query, limit=top_k
+                # collection_name=collection_name, 
+                # query=multivector_query, 
+                # limit=top_k,
+                collection_name=collection_name, 
+                query=multivector_query,
+                search_params=models.SearchParams(
+                quantization=models.QuantizationSearchParams(
+                    ignore=False,
+                    rescore=True,
+                    oversampling=2.0,
+                )
+            ),
+                limit=top_k
             )
             positive_index = batch_idx*config['batch_size']['query']+ki
             scores_k = [r.score for r in search_result.points]
