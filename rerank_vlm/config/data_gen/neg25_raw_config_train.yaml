@@ -2,17 +2,17 @@ model:
   name: "/data/hf_models/colpali-v1.2-merged"
   cache_dir: "/data/hf_models/"
 
-device: "cuda:2"
+device: "cuda:1"
 
 dataset:
   input_path: "/data/hf_datasets/colpali_train_set/"
-  output_dir: "/data/hf_datasets/rerank_train_set_colpali_1_2merge_train500_qdrantdb/"
-  split: "train[:500]"
+  output_dir: "/data/hf_datasets/rerank_train_set_colpali_1_2merge_train11_qdrantdb_bin1/"
+  split: "train[:2280]"
   source: ["tatdqa","pdf"]
 
 db:
   db_path: "/data/hf_datasets/qdrantdb"
-  collection_name: "coplali_full_train500"
+  collection_name: "coplali_full_train2280"
 
 batch_size:
   image: 8

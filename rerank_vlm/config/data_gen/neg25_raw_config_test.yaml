@@ -2,11 +2,11 @@ model:
   name: "/data/hf_models/colpali-v1.2-merged"
   cache_dir: "/data/hf_models/"
 
-device: "cuda:2"
+device: "cuda:1"
 
 dataset:
   input_path: "/data/hf_datasets/colpali_train_set/"
-  output_dir: "/data/hf_datasets/rerank_train_set_colpali_1_2merge_test500_qdrantdb_bin/"
+  output_dir: "/data/hf_datasets/rerank_train_set_colpali_1_2merge_test500_qdrantdb/"
   split: "test"
   source: ["tatdqa","pdf"]
 
