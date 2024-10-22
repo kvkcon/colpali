@@ -156,7 +156,7 @@ def main():
             multivector = embedding.cpu().float().numpy().tolist()
             points.append(
                 models.PointStruct(
-                    id=batch_idx*batch_size+j,  # we just use the index as the ID
+                    id=batch_idx*4+j,  # we just use the index as the ID
                     vector=multivector,  # This is now a list of vectors
                     payload={
                         "source": dataset[batch_idx*batch_size+j]["source"],
