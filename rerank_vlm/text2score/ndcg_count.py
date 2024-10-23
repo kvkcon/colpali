@@ -1,7 +1,7 @@
 import numpy as np
 from datasets import load_from_disk, load_dataset
 # from PIL import Image
-import tqdm
+from tqdm import tqdm 
 
 def dcg_at_k(relevance, k=5, method=0):
     """
@@ -60,9 +60,9 @@ def main():
     ndcg_min = 1.0
     ndcg_max = 0.0
     # count every query NDCG@k
-    for i in range(tqdm(len(queries),desc="Processing queries...")):
+    for i in tqdm(range(len(queries)), desc="Processing queries..."):
         relevance = [1.0] 
-        scores = queries['scores'][i]
+        scores = [sc/10 for sc in queries['scores'][i]]
         k = min(len(scores), 10)  
         ndcg = ndcg_at_k(relevance, scores, k)
         ndcg_sum += ndcg
