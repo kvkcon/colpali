@@ -1,0 +1,25 @@
+model:
+  name: '/data/hf_models/Qwen2-VL-7B-Instruct/' # '/data/hf_models/Qwen2-VL-7B-Instruct/' Molmo-7B-D-0924 ucaslcl/GOT-OCR2_0
+  cache_dir: "/data/hf_models/"
+  tensor_parallel_size: 2
+  max_tokens: 2048
+
+device: "cuda"
+
+dataset:
+  input_path: "/data/hf_datasets/colpali_train_set/"
+  output_dir: "/data/hf_datasets/ocr_erank_train_set_colpali_qwen2vl_train118659_vllm_4096/"
+  split: "train[60000:]"
+  source: ["tatdqa","pdf"]
+
+save:
+  save_batch_size: 5000
+  split_num: 60000
+
+db:
+  db_path: "/data/hf_datasets/qdrantdb"
+  collection_name: "coplali_full_train118659"
+
+batch_size:
+  image: 8
+  query: 32
